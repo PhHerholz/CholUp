@@ -176,7 +176,6 @@ extern "C"
 
 namespace
 {
-    int ione = 1;
     double one = 1.;
     double zero = .0;
     double minus_one = -1.;
