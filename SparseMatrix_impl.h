@@ -47,13 +47,13 @@ SparseMatrix<T>::SparseMatrix(const SparseMatrix& A)
 
 template<class T>
 SparseMatrix<T>::SparseMatrix(Eigen::SparseMatrix<T, Eigen::ColMajor, int>& eigenMatrix)
-:   nrows((int)eigenMatrix.rows()),
-    ncols((int)eigenMatrix.cols()),
+:   dataBorrowed(true),
+    nrows((int)eigenMatrix.rows()),
     nnz((int)eigenMatrix.nonZeros()),
+    ncols((int)eigenMatrix.cols()),
     col(eigenMatrix.outerIndexPtr()),
     row(eigenMatrix.innerIndexPtr()),
-    vals(eigenMatrix.valuePtr()),
-    dataBorrowed(true)
+    vals(eigenMatrix.valuePtr())
 {
     setDiagonalIndizes();
 }
