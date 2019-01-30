@@ -229,7 +229,7 @@ void
 SparseMatrix<T>::writeMatrixMarket(const std::string& filename, const bool symmetric) const
 {
 
-    ofstream file(filename);
+    std::ofstream file(filename);
     file << "%%MatrixMarket matrix coordinate real ";
 
     if(symmetric) file << "symmetric";
