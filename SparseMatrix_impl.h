@@ -14,9 +14,9 @@ template<class T>
 bool SparseMatrix<T>::compareTriplet(const Triplet& t0, const Triplet& t1)
 {
 
-    if(get<1>(t0) < get<1>(t1)) return true;
-    else if(get<1>(t0) > get<1>(t1)) return false;
-    else if(get<0>(t0) < get<0>(t1)) return true;
+    if(std::get<1>(t0) < std::get<1>(t1)) return true;
+    else if(std::get<1>(t0) > std::get<1>(t1)) return false;
+    else if(std::get<0>(t0) < std::get<0>(t1)) return true;
     else return false;
 }
 
@@ -166,7 +166,7 @@ void
 SparseMatrix<T>::setTriplets(std::vector<Triplet>& triplets, int ncols)
 {
 
-    assert(all_of(triplets.begin(), triplets.end(), [=](const Triplet& t){return ncols > get<2>(t);}));
+    assert(all_of(triplets.begin(), triplets.end(), [=](const Triplet& t){return ncols > std::get<2>(t);}));
     std::sort(triplets.begin(), triplets.end(), compareTriplet);
 
     if(col) delete[] col;
@@ -182,11 +182,11 @@ SparseMatrix<T>::setTriplets(std::vector<Triplet>& triplets, int ncols)
 
     int cnt = 0;
 
-    while(cnt <= get<1>(triplets.front()))
+    while(cnt <= std::get<1>(triplets.front()))
         col[cnt++] = 0;
 
-    int i = get<0>(triplets.front());
-    int j = get<1>(triplets.front());
+    int i = std::get<0>(triplets.front());
+    int j = std::get<1>(triplets.front());
     T sum = T();
 
     cnt = 0;
@@ -194,9 +194,9 @@ SparseMatrix<T>::setTriplets(std::vector<Triplet>& triplets, int ncols)
 
     for(auto& t : triplets)
     {
-        if(get<0>(t) == i && get<1>(t) == j)
+        if(std::get<0>(t) == i && std::get<1>(t) == j)
         {
-            sum += get<2>(t);
+            sum += std::get<2>(t);
         } else
         {
             row[cnt] = i;
@@ -204,7 +204,7 @@ SparseMatrix<T>::setTriplets(std::vector<Triplet>& triplets, int ncols)
 
             ++cnt;
 
-            while(get<1>(t) > j++)
+            while(std::get<1>(t) > j++)
                 col[colCnt++] = cnt;
 
             tie(i, j, sum) = t;
