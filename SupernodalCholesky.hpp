@@ -122,8 +122,8 @@ SupernodalCholesky<MatrixType>::memoryReport()
     const int workspaceData = wslen * sizeof(double);
     const int workspaceTmpData = 2 * L.numcols * sizeof(int);
 
-    return string("Memory report: \n") +
-           string("factor structure data    : ") + to_string(matrixStructureData) + "\n" +
+    return std::string("Memory report: \n") +
+           std::string("factor structure data    : ") + to_string(matrixStructureData) + "\n" +
            "factor value data        : " + to_string(matrixValueData) + "\n" +
            "row structure data       : " + to_string(rowStructureData) + "\n" +
            "tree information         : " + to_string(treeData) + "\n" +
@@ -299,7 +299,7 @@ std::vector<int>
 SupernodalCholesky<MatrixType>::findUpdateColumns(const std::vector<int>& rowMap, const int NROI)
 {
     using namespace std;
-    vector<int> updateColumns;
+    std::vector<int> updateColumns;
     updateColumns.reserve(N - NROI);
 
     int lastSupernode = -1;
@@ -328,7 +328,7 @@ SupernodalCholesky<MatrixType>::findUpdateColumns(const std::vector<int>& rowMap
         }
     }
 
-    sort(updateColumns.begin(), updateColumns.end());
+    std::sort(updateColumns.begin(), updateColumns.end());
     updateColumns.erase(unique(updateColumns.begin(), updateColumns.end()), updateColumns.end());
 
     return  updateColumns;
@@ -385,7 +385,7 @@ void SupernodalCholesky<MatrixType>::partialRefactorize(const MatrixType& A0,
     std::fill_n(flag_, NS, true);
     assert(all_of(ws_, ws_ + wslen_, [](const double d){return d == .0;}));
 
-    vector<int> columnFlag(NS, -1);
+    std::vector<int> columnFlag(NS, -1);
 
     int top = topDirtyNodes;
 
@@ -1141,7 +1141,7 @@ void SupernodalCholesky<MatrixType>::numeric(const MatrixType& A)
     std::fill_n(L.vals, L.NNZ, 0.0);
     std::fill_n(ws, wslen, 0.0);
 
-    vector<int> columnFlag(NS, -1);
+    std::vector<int> columnFlag(NS, -1);
 
     for(int i = 0; i < NS; ++i)
     {

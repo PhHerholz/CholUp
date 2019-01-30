@@ -27,7 +27,7 @@ loadIds(std::string fname)
     int* idPtr = (int*)ids.data();
     int nids = (int)ids.size() / sizeof(int);
 
-    return vector<int>(idPtr, idPtr + nids);
+    return std::vector<int>(idPtr, idPtr + nids);
 }
 
 int main(int argc, const char * argv[])
@@ -36,7 +36,7 @@ int main(int argc, const char * argv[])
     Eigen::SparseMatrix<double> eigenM;
     Eigen::loadMarket(eigenM, "./data/LTL.mtx");
     auto roiIds = loadIds("./data/ids");
-    sort(roiIds.begin(), roiIds.end());
+    std::sort(roiIds.begin(), roiIds.end());
     SparseMatrix<double> A(eigenM);
 
     // factorize & update

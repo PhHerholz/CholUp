@@ -170,7 +170,7 @@ SparseMatrix<T>::setTriplets(std::vector<Triplet>& triplets, int ncols)
     using namespace std;
 
     assert(all_of(triplets.begin(), triplets.end(), [=](const Triplet& t){return ncols > get<2>(t);}));
-    sort(triplets.begin(), triplets.end(), compareTriplet);
+    std::sort(triplets.begin(), triplets.end(), compareTriplet);
 
     if(col) delete[] col;
     col = new int [ncols + 1];
