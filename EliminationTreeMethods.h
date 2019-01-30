@@ -18,9 +18,9 @@ int ereach(const SparseMatrix<double>& A, int NS, int k, int k0, const int* pare
 template<class MatrixType>
 void computeColCounts(const MatrixType& A, int* parent, int* post, int* colcount /* out*/)
 {
-    int i, j, k, n, m, J, s, p, q, jleaf, *maxfirst, *prevleaf,
+    int i, j, k, n, J, s, p, q, jleaf, *maxfirst, *prevleaf,
     *ancestor, *w, *first, *delta ;
-    m = n = A.ncols;
+    n = A.ncols;
 
     s = 4*n;
 
