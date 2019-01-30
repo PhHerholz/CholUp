@@ -236,7 +236,7 @@ SparseMatrix<T>::writeMatrixMarket(const std::string& filename, const bool symme
     else file << "general";
 
     file << endl;
-    file << setiosflags(ios::fixed);
+    file << std::setiosflags(std::ios::fixed);
     file.precision(20);
 
     if(!nnz || !ncols)
