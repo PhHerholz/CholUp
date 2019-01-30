@@ -54,7 +54,6 @@ SparseMatrix<T> fromEigen(const Eigen::SparseMatrix<T>& A);
 template<class T>
 SparseMatrix<T> fromEigen(const Eigen::SparseMatrix<T>& A)
 {
-    using namespace std;
 
     SparseMatrix<T> ret;
 

@@ -237,7 +237,6 @@ template<class T>
 SparseMatrix<T>
 SparseSupernodalMatrix<T>::toSparseMatrix(const bool moveVals, const bool transposed)
 {
-    using namespace std;
     SparseMatrix<T> ret;
 
     if(transposed)

@@ -13,7 +13,6 @@
 template<class T>
 bool SparseMatrix<T>::compareTriplet(const Triplet& t0, const Triplet& t1)
 {
-    using namespace std;
 
     if(get<1>(t0) < get<1>(t1)) return true;
     else if(get<1>(t0) > get<1>(t1)) return false;
@@ -76,7 +75,6 @@ SparseMatrix<T>::~SparseMatrix()
 template<class T>
 SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix& A)
 {
-    using namespace std;
 
     nnz = A.nnz;
     ncols = A.ncols;
@@ -167,7 +165,6 @@ template<class T>
 void
 SparseMatrix<T>::setTriplets(std::vector<Triplet>& triplets, int ncols)
 {
-    using namespace std;
 
     assert(all_of(triplets.begin(), triplets.end(), [=](const Triplet& t){return ncols > get<2>(t);}));
     std::sort(triplets.begin(), triplets.end(), compareTriplet);
@@ -231,7 +228,6 @@ template<class T>
 void
 SparseMatrix<T>::writeMatrixMarket(const std::string& filename, const bool symmetric) const
 {
-    using namespace std;
 
     ofstream file(filename);
     file << "%%MatrixMarket matrix coordinate real ";

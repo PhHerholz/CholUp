@@ -7,7 +7,6 @@
 #include <unsupported/Eigen/SparseExtra>
 #include "Timer.hpp"
 
-using namespace std;
 
 // just loads a bunch of binary integers
 vector<int>

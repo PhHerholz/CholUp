@@ -114,7 +114,6 @@ template<class MatrixType>
 std::string
 SupernodalCholesky<MatrixType>::memoryReport()
 {
-    using namespace std;
 
     const int matrixStructureData = (3 * L.NS + L.NR + L.numcols) * sizeof(int);
     const int matrixValueData = L.NNZ * sizeof(T);
@@ -299,7 +298,6 @@ template<class MatrixType>
 std::vector<int>
 SupernodalCholesky<MatrixType>::findUpdateColumns(const std::vector<int>& rowMap, const int NROI)
 {
-    using namespace std;
     std::vector<int> updateColumns;
     updateColumns.reserve(N - NROI);
 
@@ -371,7 +369,6 @@ void SupernodalCholesky<MatrixType>::partialRefactorize(const MatrixType& A0,
                                                         double* ws_,
                                                         int wslen_)
 {
-    using namespace std;
 
     if(!flag_) flag_ = flag.data();
     if(!iws_) iws_ = iwsN;
@@ -537,7 +534,6 @@ struct SetZeroChunk
 template<int NumThreads, class Chunk>
 void parallelCopy(const Chunk* start, const Chunk* beyond, const int totalLen)
 {
-    using namespace std;
 
     // split the chunks into NumThreads segments to be
     // processed in parallel.
@@ -604,7 +600,6 @@ SupernodalCholesky<MatrixType>::copySupernodes(const std::vector<int>& scols,
                                                const int* skipStart, const int* skipEnd,
                                                SupernodalCholesky<MatrixType>& f2)
 {
-    using namespace std;
 
     // we need the skip list sorted!
 
@@ -810,7 +805,6 @@ SupernodalCholesky<MatrixType>::subfactor(const std::vector<int>& scols,
                                           int* stats)
 
 {
-    using namespace std;
 
     assert(is_sorted(scols.begin(), scols.end()));
     assert(!scols.empty());
@@ -1134,8 +1128,6 @@ template<class MatrixType>
 void SupernodalCholesky<MatrixType>::numeric(const MatrixType& A)
 {
 
-    using namespace std;
-
     const int NS = L.NS;
     int k0 = 0;
 
@@ -1259,7 +1251,6 @@ void SupernodalCholesky<MatrixType>::numeric(const MatrixType& A)
 template<class MatrixType>
 void SupernodalCholesky<MatrixType>::symbolic(const MatrixType& A)
 {
-    using namespace std;
 
     // compute etree of for A
     int* colCount = new int[N];
