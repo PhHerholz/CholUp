@@ -58,7 +58,7 @@ public:
 template<class T, int Cols>
 SupernodalVector<T, Cols>::SupernodalVector(SupernodalVector&& A)
 {
-    *this = move(A);
+    *this = std::move(A);
 }
 
 template<class T, int Cols>
@@ -317,7 +317,7 @@ SparseSupernodalMatrix<T>::toSparseMatrix(const bool moveVals, const bool transp
         ret.row = new int[NNZ];
         ret.vals = new T[NNZ];
 
-        copy(vals, vals + NNZ, ret.vals);
+        std::copy(vals, vals + NNZ, ret.vals);
 
         int cnt = 0;
 

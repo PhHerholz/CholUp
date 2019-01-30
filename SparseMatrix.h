@@ -66,9 +66,9 @@ SparseMatrix<T> fromEigen(const Eigen::SparseMatrix<T>& A)
     ret.row = new int[A.nonZeros()];
     ret.vals = new T[A.nonZeros()];
 
-    copy(A.outerIndexPtr(), A.outerIndexPtr() + A.cols() + 1, ret.col);
-    copy(A.innerIndexPtr(), A.innerIndexPtr() + A.nonZeros(), ret.row);
-    copy(A.valuePtr(), A.valuePtr() + A.nonZeros(), ret.vals);
+    std::copy(A.outerIndexPtr(), A.outerIndexPtr() + A.cols() + 1, ret.col);
+    std::copy(A.innerIndexPtr(), A.innerIndexPtr() + A.nonZeros(), ret.row);
+    std::copy(A.valuePtr(), A.valuePtr() + A.nonZeros(), ret.vals);
 
     ret.setDiagonalIndizes();
 
