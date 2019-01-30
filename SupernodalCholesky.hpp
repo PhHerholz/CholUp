@@ -582,10 +582,10 @@ void parallelCopy(const Chunk* start, const Chunk* beyond, const int totalLen)
 
     assert(i == NumThreads);
 
-    std::array<thread, NumThreads> threads;
+    std::array<std::thread, NumThreads> threads;
 
     for(int i = 0; i < NumThreads; ++i)
-        threads[i] = thread(copyData, segmentPointers[i], segmentPointers[i+1]);
+        threads[i] = std::thread(copyData, segmentPointers[i], segmentPointers[i+1]);
 
     for(int i = 0; i < NumThreads; ++i)
         threads[i].join();
