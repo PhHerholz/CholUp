@@ -820,7 +820,6 @@ SupernodalCholesky<MatrixType>::subfactor(const std::vector<int>& scols,
     int NS2 = -1;
     int csn = -1;
     int sncnt = 0;
-    int ccnt = 0;
 
     // count number of supernodes in f2.L
     // and set f2.colMap
@@ -874,7 +873,6 @@ SupernodalCholesky<MatrixType>::subfactor(const std::vector<int>& scols,
 
 
             rowCount = 0;
-            ccnt = 0;
             sncnt = 1;
             csn = sn;
 
