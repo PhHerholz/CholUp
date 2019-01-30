@@ -8,8 +8,6 @@
 #include <iomanip>
 #include <iostream>
 
-#include "Timer.hpp"
-
 template<class T>
 bool SparseMatrix<T>::compareTriplet(const Triplet& t0, const Triplet& t1)
 {
