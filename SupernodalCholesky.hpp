@@ -549,7 +549,7 @@ void parallelCopy(const Chunk* start, const Chunk* beyond, const int totalLen)
         }
     };
 
-    const int len = (int)distance(start, beyond);
+    const int len = (int)std::distance(start, beyond);
 
     if(len <  NumThreads || NumThreads == 1) // proceed with one thread only
     {
@@ -568,7 +568,7 @@ void parallelCopy(const Chunk* start, const Chunk* beyond, const int totalLen)
 
     for(auto it = start; it != beyond; ++it)
     {
-        sum += distance(it->start, it->beyond);
+        sum += std::distance(it->start, it->beyond);
 
         if(sum > cut)
         {
@@ -607,7 +607,7 @@ SupernodalCholesky<MatrixType>::copySupernodes(const std::vector<int>& scols,
 
     // we need the skip list sorted!
 
-    const int nSkip = (int)distance(skipStart, skipEnd);
+    const int nSkip = (int)std::distance(skipStart, skipEnd);
     int* skipSorted = new int[nSkip];
     partial_sort_copy(skipStart, skipEnd, skipSorted, skipSorted + nSkip);
 
@@ -650,7 +650,7 @@ SupernodalCholesky<MatrixType>::copySupernodes(const std::vector<int>& scols,
                 // index of column 'i' in supernode 'sn'
                 const int ki = i - k0;
                 double* v = L.vals + L.snodeValueStart[sn] + ki * nrows;
-                int vOffset = (int)distance(vstart, v);
+                int vOffset = (int)std::distance(vstart, v);
 
                 for(auto it = snstart; it != snend; ++it, ++vcptr)
                 {
@@ -659,8 +659,8 @@ SupernodalCholesky<MatrixType>::copySupernodes(const std::vector<int>& scols,
                     vcptr->beyond = it->beyond + vOffset;
                     vcptr->dest = vptr;
 
-                    valueCount += distance(vcptr->start, vcptr->beyond);
-                    vptr += distance(vcptr->start, vcptr->beyond);
+                    valueCount += std::distance(vcptr->start, vcptr->beyond);
+                    vptr += std::distance(vcptr->start, vcptr->beyond);
                 }
             } else
             {
@@ -675,7 +675,7 @@ SupernodalCholesky<MatrixType>::copySupernodes(const std::vector<int>& scols,
             if(skipping)
             {
                 zcptr->beyond = vptr;
-                zeroCount += distance(zcptr->start, zcptr->beyond);
+                zeroCount += std::distance(zcptr->start, zcptr->beyond);
                 ++zcptr;
             }
 
@@ -693,7 +693,7 @@ SupernodalCholesky<MatrixType>::copySupernodes(const std::vector<int>& scols,
 
             nrows = L.cols[sn+1] - L.cols[sn];
 
-            f2.L.snodeValueStart[sn2] = (int)distance(f2.L.vals, vptr);
+            f2.L.snodeValueStart[sn2] = (int)std::distance(f2.L.vals, vptr);
             f2.L.supernodeSizes[sn2] = 1;
 
             // index of column 'i' in supernode 'sn'
@@ -779,14 +779,14 @@ SupernodalCholesky<MatrixType>::copySupernodes(const std::vector<int>& scols,
 
 
             assert(f2.L.NS + 1 > sn2 + 1);
-            f2.L.cols[sn2+1] = (int)distance(f2.L.rows, rptr);
+            f2.L.cols[sn2+1] = (int)std::distance(f2.L.rows, rptr);
         }
     }
 
     if(skipping)
     {
         zcptr->beyond = vptr;
-        zeroCount += distance(zcptr->start, zcptr->beyond);
+        zeroCount += std::distance(zcptr->start, zcptr->beyond);
         ++zcptr;
     }
 
