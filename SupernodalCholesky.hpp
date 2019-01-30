@@ -381,7 +381,7 @@ void SupernodalCholesky<MatrixType>::partialRefactorize(const MatrixType& A0,
     const int NS = L.NS;
 
     std::fill_n(flag_, NS, true);
-    assert(all_of(ws_, ws_ + wslen_, [](const double d){return d == .0;}));
+    assert(std::all_of(ws_, ws_ + wslen_, [](const double d){return d == .0;}));
 
     std::vector<int> columnFlag(NS, -1);
 
@@ -503,7 +503,7 @@ void SupernodalCholesky<MatrixType>::partialRefactorize(const MatrixType& A0,
         k0 = k1;
     }
 
-    assert(all_of(ws_, ws_ + wslen_, [](const double d){return d == .0;}));
+    assert(std::all_of(ws_, ws_ + wslen_, [](const double d){return d == .0;}));
 }
 
 struct CopyChunk
@@ -996,7 +996,7 @@ template<class MatrixType>
 void SupernodalCholesky<MatrixType>::update(SparseMatrix<double>& W)
 {
     assert(W.ncols == 1);
-    assert(all_of(ws, ws + wslen, [](const double d){return d == 0.;}));
+    assert(std::all_of(ws, ws + wslen, [](const double d){return d == 0.;}));
 
     // scatter single column in W into ws
     for(int i = W.col[0]; i < W.col[1]; ++i)
