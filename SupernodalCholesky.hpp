@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <thread>
+#include <cstring>
 
 
 template<class MatrixType>
@@ -1302,7 +1303,7 @@ void SupernodalCholesky<MatrixType>::symbolic(const MatrixType& A)
     // form supernodes
     // count number of childs in 'iws2'
 
-    fill(iwsN2, iwsN2 + N, 0);
+    std::fill(iwsN2, iwsN2 + N, 0);
 
     for(int i = 0; i < N; ++i)
     {
@@ -1345,7 +1346,7 @@ void SupernodalCholesky<MatrixType>::symbolic(const MatrixType& A)
     ws = new double[wslen];
 
     L.supernodeSizes = new int[NS];
-    memcpy((void*)L.supernodeSizes, (void*)iwsN, NS * sizeof(int));
+    std::memcpy((void*)L.supernodeSizes, (void*)iwsN, NS * sizeof(int));
 
     L.numcols = N;
 
