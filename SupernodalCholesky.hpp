@@ -382,7 +382,7 @@ void SupernodalCholesky<MatrixType>::partialRefactorize(const MatrixType& A0,
 
     const int NS = L.NS;
 
-    fill_n(flag_, NS, true);
+    std::fill_n(flag_, NS, true);
     assert(all_of(ws_, ws_ + wslen_, [](const double d){return d == .0;}));
 
     vector<int> columnFlag(NS, -1);
@@ -857,7 +857,7 @@ SupernodalCholesky<MatrixType>::subfactor(const std::vector<int>& scols,
 
 
     f2.startColsInRow = new int[N2 + 1];
-    fill_n(f2.startColsInRow, N2 + 1, 0);
+    std::fill_n(f2.startColsInRow, N2 + 1, 0);
 
     csn = -2;
     int currSn = 0;
@@ -1138,8 +1138,8 @@ void SupernodalCholesky<MatrixType>::numeric(const MatrixType& A)
     const int NS = L.NS;
     int k0 = 0;
 
-    fill_n(L.vals, L.NNZ, 0.0);
-    fill_n(ws, wslen, 0.0);
+    std::fill_n(L.vals, L.NNZ, 0.0);
+    std::fill_n(ws, wslen, 0.0);
 
     vector<int> columnFlag(NS, -1);
 
@@ -1390,7 +1390,7 @@ void SupernodalCholesky<MatrixType>::symbolic(const MatrixType& A)
     }
 
     // compute column/row indizes
-    fill_n(flag.data(), NS, 0);
+    std::fill_n(flag.data(), NS, 0);
     int* rptr = L.rows;
 
     int* colsInRowPtr = colsInRow = new int[L.NR];

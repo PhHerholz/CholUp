@@ -96,10 +96,10 @@ SupernodalVector<T, Cols>::operator=(const SupernodalVector& A)
         NNZ = A.NNZ;
 
         rows = new int[NR];
-        copy_n(A.rows, NR, rows);
+        std::copy_n(A.rows, NR, rows);
 
         vals = new T[NNZ];
-        copy_n(A.vals, NNZ, vals);
+        std::copy_n(A.vals, NNZ, vals);
     }
 
     return *this;
@@ -151,22 +151,22 @@ SparseSupernodalMatrix<T>::operator=(const SparseSupernodalMatrix& A)
         NNZ = A.NNZ;
 
         supernodeSizes = new int[NS];
-        copy_n(A.supernodeSizes, NS, supernodeSizes);
+        std::copy_n(A.supernodeSizes, NS, supernodeSizes);
 
         snodeValueStart = new int[NS];
-        copy_n(A.snodeValueStart, NS, snodeValueStart);
+        std::copy_n(A.snodeValueStart, NS, snodeValueStart);
 
         cols = new int[NS + 1];
-        copy_n(A.cols, NS + 1, cols);
+        std::copy_n(A.cols, NS + 1, cols);
 
         rows = new int[NR];
-        copy_n(A.rows, NR, rows);
+        std::copy_n(A.rows, NR, rows);
 
         vals = new T[NNZ];
-        copy_n(A.vals, NNZ, vals);
+        std::copy_n(A.vals, NNZ, vals);
 
         colMap = new int[numcols];
-        copy_n(A.colMap, numcols, colMap);
+        std::copy_n(A.colMap, numcols, colMap);
     }
 
     return *this;
@@ -243,7 +243,7 @@ SparseSupernodalMatrix<T>::toSparseMatrix(const bool moveVals, const bool transp
     if(transposed)
     {
         ret.col = new int[numrows + 1];
-        fill_n(ret.col, numrows + 1, 0);
+        std::fill_n(ret.col, numrows + 1, 0);
 
         ret.nrows = numcols;
         ret.ncols = numrows;

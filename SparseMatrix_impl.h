@@ -31,7 +31,7 @@ SparseMatrix<T>::SparseMatrix(const int nrows_, const int ncols_)
 : nrows(nrows_), ncols(ncols_)
 {
     col = new int[ncols + 1];
-    fill_n(col, ncols + 1, 0);
+    std::fill_n(col, ncols + 1, 0);
 }
 
 template<class T>
@@ -83,18 +83,18 @@ SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix& A)
     nrows = A.nrows;
 
     row = new int[nnz];
-    copy_n(A.row, nnz, row);
+    std::copy_n(A.row, nnz, row);
 
     col = new int[ncols + 1];
-    copy_n(A.col, ncols + 1, col);
+    std::copy_n(A.col, ncols + 1, col);
 
     vals = new T[nnz];
-    copy_n(A.vals, nnz, vals);
+    std::copy_n(A.vals, nnz, vals);
 
     if(A.diag)
     {
         diag = new int[min(ncols, nrows)];
-        copy_n(A.diag, min(ncols, nrows), diag);
+        std::copy_n(A.diag, min(ncols, nrows), diag);
     }
 
     return *this;

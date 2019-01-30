@@ -21,7 +21,7 @@ public:
     : nrows(m.nrows), ncols(m.ncols)
     {
         data = new T[nrows * ncols];
-        copy_n(m.data, nrows * ncols, data);
+        std::copy_n(m.data, nrows * ncols, data);
     }
 
     Matrix& operator=(const Matrix<T>& m)
@@ -34,7 +34,7 @@ public:
             if(data) delete[] data;
 
             data = new T[nrows * ncols];
-            copy_n(m.data, nrows * ncols, data);
+            std::copy_n(m.data, nrows * ncols, data);
         }
 
         return *this;
@@ -67,7 +67,7 @@ public:
         if(data) delete[] data;
         data = new T[nrows * ncols];
 
-        fill_n(data, nrows * ncols, init);
+        std::fill_n(data, nrows * ncols, init);
     }
 
     T& operator()(const int i, const int j)
