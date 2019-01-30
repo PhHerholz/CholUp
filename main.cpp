@@ -38,22 +38,22 @@ int main(int argc, const char * argv[])
     auto roiIds = loadIds("./data/ids");
     sort(roiIds.begin(), roiIds.end());
     SparseMatrix<double> A(eigenM);
-    
+
     // factorize & update
     SupernodalCholesky<SparseMatrix<double>> chol(A);
     auto cholPart0 = chol.dirichletPartialFactor(A, roiIds);
-    
+
     // solve linear system involving cholPart0
-    
+
     // setup rhs
     Matrix<double> rhs(cholPart0.L.numcols, 3);
     rhs.fill();
     rhs(0, 0) = rhs(0, 1) = rhs(0, 2) = 1;
     auto rhs0 = rhs;
-    
+
     // solve
     cholPart0.solve(rhs);
-    
+
     // write out solution
     rhs0.write("./data/b");
     rhs.write("./data/x");

@@ -6,22 +6,22 @@ int ereach(const SparseMatrix<double>& A, int NS, int k, int k0, const int* pare
     int i, len;
     int top = NS;
     int sk = colMap[k];
-    
+
     w[sk] = k;
-    
+
     for(int p = A.col[k]; p < A.diag[k]; ++p)
     {
         i = colMap[A.row[p]];
-        
+
         for(len = 0; w[i] < k0; i = parent[i])
         {
             s[len++] = i;
             w[i] = k;
         }
-        
+
         while(len > 0) s[--top] = s[--len];
     }
-    
+
     return top;
 }
 
@@ -43,9 +43,9 @@ int tdfs(int j, int k, int *head, const int *next, int *post, int *stack)
 {
     int i, p, top = 0;
     if (!head || !next || !post || !stack) return -1;
-    
+
     stack[0] = j;
-    
+
     while(top >= 0)
     {
         p = stack[top];
@@ -60,7 +60,7 @@ int tdfs(int j, int k, int *head, const int *next, int *post, int *stack)
             stack[++top] = i;
         }
     }
-    
+
     return k;
 }
 
@@ -68,27 +68,27 @@ void postOrdering(const int* parent, const int n, int* post)
 {
     int k = 0;
     int* w = new int[3 * n];
-    
+
     int* head = w;
     int* next = w + n;
     int* stack = w + 2 * n;
-    
+
     for(int j = 0; j < n; ++j) head[j] = -1;
-    
+
     for(int j = n-1; j >= 0; --j)
     {
         if(parent[j] == -1) continue;
-        
+
         next[j] = head[parent[j]];
         head[parent[j]] = j;
     }
-    
+
     for(int j = 0; j < n; ++j)
     {
         if(parent[j] != -1) continue;
         k = tdfs(j, k, head, next, post, stack);
     }
-    
+
     delete[] w;
 }
 
