@@ -1,0 +1,82 @@
+#ifndef Cholesky_SparseMatrix_h
+#define Cholesky_SparseMatrix_h
+
+#include <vector>
+#include <tuple>
+#include <string>
+#include <Eigen/Sparse>
+
+
+template<class T>
+class SparseMatrix
+{
+public:
+    typedef std::tuple<int, int, T> Triplet;
+    static bool compareTriplet(const Triplet& t0, const Triplet& t1);
+    
+    typedef T ValueType;
+    
+    bool dataBorrowed = false;
+    
+    int nrows = -1;
+    int nnz = 0;
+    int ncols = 0;
+    
+    int* col = nullptr;
+    int* diag = nullptr;
+    int* row = nullptr;
+    T* vals = nullptr;
+    
+    SparseMatrix();
+    SparseMatrix(const int nrows, const int ncols);
+    explicit SparseMatrix(const SparseMatrix& A);
+    SparseMatrix(SparseMatrix&& A);
+    SparseMatrix& operator=(SparseMatrix&& A);
+    SparseMatrix& operator=(const SparseMatrix& A);
+
+    explicit SparseMatrix(Eigen::SparseMatrix<T, Eigen::ColMajor, int>& eigenMatrix);
+    
+    void setDiagonalIndizes();
+    
+    ~SparseMatrix();
+    
+    void setTriplets(std::vector<Triplet>& triplets, int ncols);
+    
+    static SparseMatrix identity(const int n);
+    
+    void addToDiagonal(const T val);
+    
+    void writeMatrixMarket(const std::string& filename, const bool symmetric = false) const;
+};
+
+template<class T>
+SparseMatrix<T> fromEigen(const Eigen::SparseMatrix<T>& A);
+
+template<class T>
+SparseMatrix<T> fromEigen(const Eigen::SparseMatrix<T>& A)
+{
+    using namespace std;
+    
+    SparseMatrix<T> ret;
+    
+    ret.nnz = (int)A.nonZeros();
+    ret.nrows = (int)A.rows();
+    ret.ncols = (int)A.cols();
+    
+    ret.col = new int[A.cols() + 1];
+    ret.row = new int[A.nonZeros()];
+    ret.vals = new T[A.nonZeros()];
+    
+    copy(A.outerIndexPtr(), A.outerIndexPtr() + A.cols() + 1, ret.col);
+    copy(A.innerIndexPtr(), A.innerIndexPtr() + A.nonZeros(), ret.row);
+    copy(A.valuePtr(), A.valuePtr() + A.nonZeros(), ret.vals);
+    
+    ret.setDiagonalIndizes();
+    
+    return ret;
+}
+
+#include "SparseMatrix_impl.h"
+
+
+#endif
