@@ -16,7 +16,7 @@ loadIds(std::string fname)
 
     if(!file.good())
     {
-        cout << "file not found" << std::endl;
+        std::cout << "file not found" << std::endl;
         return {};
     }
 
