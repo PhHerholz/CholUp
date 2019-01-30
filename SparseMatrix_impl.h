@@ -91,8 +91,8 @@ SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix& A)
 
     if(A.diag)
     {
-        diag = new int[min(ncols, nrows)];
-        std::copy_n(A.diag, min(ncols, nrows), diag);
+        diag = new int[std::min(ncols, nrows)];
+        std::copy_n(A.diag, std::min(ncols, nrows), diag);
     }
 
     return *this;
