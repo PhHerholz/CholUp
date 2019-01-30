@@ -235,7 +235,7 @@ SparseMatrix<T>::writeMatrixMarket(const std::string& filename, const bool symme
     if(symmetric) file << "symmetric";
     else file << "general";
 
-    file << endl;
+    file << std::endl;
     file << std::setiosflags(std::ios::fixed);
     file.precision(20);
 

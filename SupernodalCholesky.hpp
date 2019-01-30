@@ -490,7 +490,7 @@ void SupernodalCholesky<MatrixType>::partialRefactorize(const MatrixType& A0,
 
         // dense cholesky factorization of diagonal block
         dpotrf_(&cL, &ss, &L.vals[L.snodeValueStart[i]], &nrows, &info);
-        if(info) cout << "dpotrf error, matrix is not numerical postive definite" << endl;
+        if(info) cout << "dpotrf error, matrix is not numerical postive definite" << std::endl;
 
         int tailRows = nrows - ss;
 
@@ -1232,7 +1232,7 @@ void SupernodalCholesky<MatrixType>::numeric(const MatrixType& A)
 
         if(info)
         {
-            cout << "dpotrf error, matrix is not numerical postive definite" << endl;
+            cout << "dpotrf error, matrix is not numerical postive definite" << std::endl;
         }
 
         int tailRows = nrows - ss;
@@ -1360,7 +1360,7 @@ void SupernodalCholesky<MatrixType>::symbolic(const MatrixType& A)
 
     delete[] colCount;
 
-    if(L.rows || L.vals) cout << "should not be allocated!" << endl;
+    if(L.rows || L.vals) cout << "should not be allocated!" << std::endl;
 
     L.NR = L.cols[NS];
     L.rows = new int[L.NR];
