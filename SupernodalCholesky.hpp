@@ -605,7 +605,7 @@ SupernodalCholesky<MatrixType>::copySupernodes(const std::vector<int>& scols,
 
     const int nSkip = (int)std::distance(skipStart, skipEnd);
     int* skipSorted = new int[nSkip];
-    partial_sort_copy(skipStart, skipEnd, skipSorted, skipSorted + nSkip);
+    std::partial_sort_copy(skipStart, skipEnd, skipSorted, skipSorted + nSkip);
 
 
     int currSn = -1;
