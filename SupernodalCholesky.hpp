@@ -123,13 +123,13 @@ SupernodalCholesky<MatrixType>::memoryReport()
     const int workspaceTmpData = 2 * L.numcols * sizeof(int);
 
     return std::string("Memory report: \n") +
-           std::string("factor structure data    : ") + to_string(matrixStructureData) + "\n" +
-           "factor value data        : " + to_string(matrixValueData) + "\n" +
-           "row structure data       : " + to_string(rowStructureData) + "\n" +
-           "tree information         : " + to_string(treeData) + "\n" +
-           "total factorization data : " + to_string( (matrixStructureData + matrixValueData + rowStructureData + treeData) * 10e-6 ) + " MB \n" +
-           "workspace data           : " + to_string(workspaceData) + "\n" +
-           "temporary ws data        : " + to_string(workspaceTmpData) + "\n\n";
+           std::string("factor structure data    : ") + std::to_string(matrixStructureData) + "\n" +
+           "factor value data        : " + std::to_string(matrixValueData) + "\n" +
+           "row structure data       : " + std::to_string(rowStructureData) + "\n" +
+           "tree information         : " + std::to_string(treeData) + "\n" +
+           "total factorization data : " + std::to_string( (matrixStructureData + matrixValueData + rowStructureData + treeData) * 10e-6 ) + " MB \n" +
+           "workspace data           : " + std::to_string(workspaceData) + "\n" +
+           "temporary ws data        : " + std::to_string(workspaceTmpData) + "\n\n";
 }
 
 
