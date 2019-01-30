@@ -2,6 +2,8 @@
 
 #include "SparseMatrix.h"
 
+namespace CholUp {
+
 int tdfs(int j, int k, int *head, const int *next, int *post, int *stack);
 
 void postOrdering(const int* parent, const int n, int* post);
@@ -107,3 +109,5 @@ void rowCounts(const MatrixType& A, int* parent, int* post, int* rowcount)
 
     delete[] w;
 }
+
+} /* namespace CholUp */

@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <iostream>
 
+namespace CholUp {
+
 template<class T>
 bool SparseMatrix<T>::compareTriplet(const Triplet& t0, const Triplet& t1)
 {
@@ -252,3 +254,5 @@ SparseMatrix<T>::writeMatrixMarket(const std::string& filename, const bool symme
 
     file.close();
 }
+
+} /* namespace CholUp */

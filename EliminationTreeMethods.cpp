@@ -1,6 +1,8 @@
 #include "EliminationTreeMethods.h"
 #include "SparseMatrix.h"
 
+namespace CholUp {
+
 int ereach(const SparseMatrix<double>& A, int NS, int k, int k0, const int* parent, const int* colMap, int* s, int* w)
 {
     int i, len;
@@ -112,3 +114,5 @@ int leaf (int i, int j, const int *first, int *maxfirst, int *prevleaf,
     }
     return (q) ;                    /* q = least common ancester (jprev,j) */
 }
+
+} /* namespace CholUp */

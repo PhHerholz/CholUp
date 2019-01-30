@@ -5,6 +5,7 @@
 #include <string>
 #include <Eigen/Sparse>
 
+namespace CholUp {
 
 template<class T>
 class SparseMatrix
@@ -73,5 +74,7 @@ SparseMatrix<T> fromEigen(const Eigen::SparseMatrix<T>& A)
 
     return ret;
 }
+
+} /* namespace CholUp */
 
 #include "SparseMatrix_impl.h"

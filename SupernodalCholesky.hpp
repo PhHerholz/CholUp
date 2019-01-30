@@ -11,6 +11,7 @@
 #include <thread>
 #include <cstring>
 
+namespace CholUp {
 
 template<class MatrixType>
 class SupernodalCholesky
@@ -1433,3 +1434,5 @@ void SupernodalCholesky<MatrixType>::symbolic(const MatrixType& A)
 
     L.cols[0] = 0;
 }
+
+} /* namespace CholUp */

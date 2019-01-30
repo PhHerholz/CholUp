@@ -1,5 +1,7 @@
 #pragma once
 
+namespace CholUp {
+
 template<class T, int Cols>
 class SupernodalVector
 {
@@ -341,3 +343,5 @@ SparseSupernodalMatrix<T>::toSparseMatrix(const bool moveVals, const bool transp
 
     return ret;
 }
+
+} /* namespace CholUp */

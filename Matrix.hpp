@@ -6,6 +6,8 @@
 #include <iostream>
 #include <iomanip>
 
+namespace CholUp {
+
 template<class T>
 class Matrix
 {
@@ -123,3 +125,5 @@ public:
     }
 
 };
+
+} /* namespace CholUp */
