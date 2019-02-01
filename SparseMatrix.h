@@ -4,6 +4,7 @@
 #include <tuple>
 #include <string>
 #include <Eigen/Sparse>
+#include "Matrix.hpp"
 
 namespace CholUp {
 
@@ -22,11 +23,13 @@ public:
     int nnz = 0;
     int ncols = 0;
 
+    int* perm = nullptr;
+    
     int* col = nullptr;
     int* diag = nullptr;
     int* row = nullptr;
     T* vals = nullptr;
-
+    
     SparseMatrix();
     SparseMatrix(const int nrows, const int ncols);
     explicit SparseMatrix(const SparseMatrix& A);
@@ -39,6 +42,8 @@ public:
     void setDiagonalIndizes();
 
     ~SparseMatrix();
+
+    CholUp::Matrix<double> operator*(const CholUp::Matrix<double>& m) const;
 
     void setTriplets(std::vector<Triplet>& triplets, int ncols);
 

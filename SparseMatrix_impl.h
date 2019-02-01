@@ -68,8 +68,47 @@ SparseMatrix<T>::~SparseMatrix()
         if(vals) delete[] vals;
     }
 
+    if(perm) delete[] perm;
     if(diag) delete[] diag;
 }
+
+
+template<class T>
+Matrix<double>
+SparseMatrix<T>::operator*(const Matrix<double>& m) const
+{
+    if(ncols != m.nrows)
+    {
+        std::cout << "matrix dimensions do not match" << std::endl;
+        return Matrix<double>();
+    }
+
+    Matrix<double> ret(nrows, m.ncols);
+    ret.fill();
+
+    std::vector<double> buffer(m.ncols);
+
+    for(int i = 0; i < ncols; ++i)
+    {
+        std::fill_n(buffer.data(), m.ncols, 0);
+
+        for(int k = 0; k < m.ncols; ++k)
+        {
+            buffer[k] = m(i, k);
+        }
+
+        for(int j = col[i]; j < col[i+1]; ++j)
+        {
+            for(int k = 0; k < m.ncols; ++k)
+            {
+                ret(row[j], k) += buffer[k] * vals[j];
+            }
+        }
+    }
+
+    return ret;
+}
+
 
 
 template<class T>
