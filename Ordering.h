@@ -6,43 +6,26 @@
 namespace CholUp {
 
 template<class T>
-void
-createMatrixPermuted(CholUp::SparseMatrix<T>& A,
-                     std::vector<Eigen::Triplet<T>>& triplets)
+CholUp::SparseMatrix<T>
+permuteMatrix(const Eigen::SparseMatrix<T>& A, std::vector<int>& perm)
 {
     Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, int> p;
-
-    const int N =  std::max(std::max_element(triplets.begin(), triplets.end(),
-                            [](const Eigen::Triplet<T>& t0, const Eigen::Triplet<T>& t1){return t0.row() < t1.row();})->row(),
-
-                            std::max_element(triplets.begin(), triplets.end(),
-                            [](const Eigen::Triplet<T>& t0, const Eigen::Triplet<T>& t1){return t0.col() < t1.col();})->col()) + 1;
-
-    Eigen::SparseMatrix<double> B;
-    B.resize(N, N);
-    B.setFromTriplets(triplets.begin(), triplets.end());
-    assert(B.isCompressed());
-  //  assert((B - B.transpose().eval()).squared_norm() < 1e-8 && "matrix should be symmetric!");
-
+    Eigen::SparseMatrix<T> B = A;
+    
     Eigen::internal::minimum_degree_ordering(B, p);
-
-    if(A.perm) delete[] A.perm;
-    A.perm = new int[N];
-
-    for(int i = 0; i < N; ++i)
+    
+    // TODO: optimize
+    B = p.transpose() * A * p;
+    auto ret = CholUp::fromEigen(B);
+    
+    perm.resize(A.rows());
+    
+    for(int i = 0; i < A.rows(); ++i)
     {
-        A.perm[p.indices()[i]] = i;
+        perm[p.indices()[i]] = i;
     }
-
-    // reorder triplets
-    for(auto& t : triplets)
-    {
-        t = Eigen::Triplet<T>(A.perm[t.row()], A.perm[t.col()], t.value());
-    }
-
-    B.setFromTriplets(triplets.begin(), triplets.end());
-
-    A = CholUp::fromEigen(B);
+    
+    return std::move(ret);
 }
 
 } /* namespace CholUp */

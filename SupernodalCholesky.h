@@ -5,6 +5,8 @@
 #include "Matrix.hpp"
 #include "EliminationTreeMethods.h"
 #include "SparseSupernodal.h"
+#include "Ordering.h"
+#include "Timer.hpp"
 #include <vector>
 #include <algorithm>
 #include <array>
@@ -17,6 +19,10 @@ template<class MatrixType>
 class SupernodalCholesky
 {
 public:
+    
+    std::vector<int> perm, iperm;
+    SparseMatrix<double> A; // original matrix
+    
     typedef typename MatrixType::ValueType T;
 
     constexpr static int NUMTHREADS = 1;
@@ -35,8 +41,6 @@ public:
     std::vector<int> flag;
     std::vector<int> rowMap; // length N, default: -1, do we need this or can another array be used?
 
-    int* permutation = nullptr;
-
     int wslen = 0;
     double *ws = nullptr;
 
@@ -46,7 +50,7 @@ public:
     SparseSupernodalMatrix<T> L;
 
     SupernodalCholesky<MatrixType>
-    dirichletPartialFactor(const SparseMatrix<double>& A, const std::vector<int>& roi);
+    dirichletPartialFactor(const std::vector<int>& roi);
 
     void
     subfactor(const std::vector<int>& scols,
@@ -100,6 +104,8 @@ public:
 
     SupernodalCholesky() {};
 
+    explicit SupernodalCholesky(const Eigen::SparseMatrix<double, Eigen::ColMajor, int>& A);
+   
     explicit SupernodalCholesky(const MatrixType& A);
 
     SupernodalCholesky(SupernodalCholesky&& A);
@@ -132,25 +138,21 @@ SupernodalCholesky<MatrixType>::memoryReport()
            "temporary ws data        : " + std::to_string(workspaceTmpData) + "\n\n";
 }
 
-
 template<class MatrixType>
-SupernodalCholesky<MatrixType>::SupernodalCholesky(const MatrixType& A)
-: N(A.ncols), flag(A.ncols, 0), rowMap(A.ncols, -1)
+SupernodalCholesky<MatrixType>::SupernodalCholesky(const Eigen::SparseMatrix<double>& A0)
+: N(A0.cols()), flag(A0.cols(), 0), rowMap(A0.cols(), -1)
 {
-    if(A.perm)
-    {
-        permutation = new int[A.ncols];
-
-        for(int i = 0; i < A.ncols; ++i)
-            permutation[A.perm[i]] = i;
-
-    //    std::copy_n(A.perm, A.ncols, permutation);
-    }
-
+    A = permuteMatrix(A0, perm);
+    
+    iperm.resize(perm.size());
+    
+    for(int i = 0; i < A.ncols; ++i)
+        iperm[perm[i]] = i;
+    
     symbolic(A);
     numeric(A);
 }
-
+    
 template<class MatrixType>
 SupernodalCholesky<MatrixType>::~SupernodalCholesky()
 {
@@ -159,7 +161,6 @@ SupernodalCholesky<MatrixType>::~SupernodalCholesky()
     if(ws) delete[] ws;
     if(iwsN) delete[] iwsN;
     if(iwsN2) delete[] iwsN2;
-    if(permutation) delete[] permutation;
 
     if(dirtyNodes) delete[] dirtyNodes;
     if(startColsInRow) delete[] startColsInRow;
@@ -208,7 +209,9 @@ SupernodalCholesky<MatrixType>::operator=(SupernodalCholesky<MatrixType>&& A)
         L = std::move(A.L);
         flag = std::move(A.flag);
         rowMap = std::move(A.rowMap);
-
+        perm = std::move(A.perm);
+        iperm = std::move(A.iperm);
+        
         setree = A.setree;
         A.setree = nullptr;
 
@@ -240,9 +243,6 @@ SupernodalCholesky<MatrixType>::operator=(SupernodalCholesky<MatrixType>&& A)
 
         iwsN2 = A.iwsN2;
         A.iwsN2 = nullptr;
-
-        permutation = A.permutation;
-        A.permutation = nullptr;
     }
 
     return *this;
@@ -274,16 +274,16 @@ SupernodalCholesky<MatrixType>::initWorkspace()
 
 template<class MatrixType>
 SupernodalCholesky<MatrixType>
-SupernodalCholesky<MatrixType>::dirichletPartialFactor(const SparseMatrix<double>& A, const std::vector<int>& roiIds)
+SupernodalCholesky<MatrixType>::dirichletPartialFactor(const std::vector<int>& roiIds)
 {
     std::vector<int> sortedRoiIds;
 
     const auto NR = roiIds.size();
 
-    if(A.perm)
+    if(!perm.empty())
     {
         sortedRoiIds.reserve(NR);
-        for(auto& i : roiIds) sortedRoiIds.push_back(A.perm[i]);
+        for(auto& i : roiIds) sortedRoiIds.push_back(perm[i]);
         std::sort(sortedRoiIds.begin(), sortedRoiIds.end());
     } else
     {
@@ -313,32 +313,12 @@ SupernodalCholesky<MatrixType>::dirichletPartialFactor(const SparseMatrix<double
                                 wslen);
 
     // initialize permutation array of cholPart
-    cholPart.permutation = new int[NR];
-
+    cholPart.iperm.resize(NR);
+    
     for(int i = 0; i < NR; ++i)
     {
-        cholPart.permutation[i] = permutation[ sortedRoiIds[i] ];
+        cholPart.iperm[i] = iperm[ sortedRoiIds[i] ];
         rowMap[sortedRoiIds[i]] = -1;
-    }
-
-    {
-        auto v0 = roiIds;
-        std::vector<int> v1(cholPart.permutation, cholPart.permutation + NR);
-
-        sort(v0.begin(), v0.end());
-        sort(v1.begin(), v1.end());
-
-        using namespace std;
-
-        if(v0.size() == v1.size())
-        {
-            if(std::mismatch(v0.begin(), v0.end(), v1.begin()).first == v0.end())
-                cout << "ok";
-            else cout << "xxxxxxxxxx";
-
-            cout << endl;
-
-        } else cout << "xxxxx" << endl;
     }
 
 
@@ -1098,7 +1078,7 @@ void SupernodalCholesky<MatrixType>::update(SparseMatrix<double>& W)
 template<class MatrixType>
 void SupernodalCholesky<MatrixType>::solve(Matrix<T>& m)
 {
-    if(!permutation)
+    if(iperm.empty())
     {
         assert(N = m.nrows);
         solveL(m);
@@ -1112,7 +1092,7 @@ void SupernodalCholesky<MatrixType>::solve(Matrix<T>& m)
     {
         for(int i = 0; i < N; ++i)
         {
-            tmp(i, j) = m(permutation[i], j) ;
+            tmp(i, j) = m(iperm[i], j) ;
         }
     }
     
@@ -1123,7 +1103,7 @@ void SupernodalCholesky<MatrixType>::solve(Matrix<T>& m)
     {
         for(int i = 0; i < N; ++i)
         {
-            m(permutation[i], j) = tmp(i, j);
+            m(iperm[i], j) = tmp(i, j);
         }
     }
 }

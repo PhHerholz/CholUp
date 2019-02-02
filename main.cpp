@@ -78,33 +78,11 @@ tripletDimensions(std::vector<Eigen::Triplet<double>>& triplets)
 int main(int argc, const char * argv[])
 {
     // load data for update
-    CholUp::SparseMatrix<double> A;
-    auto triplets = loadTriplets("./data/tripletsLTL");
-    auto roiIds = loadIds("./data/ids");
-
-
-    // create matrix from triplets using amd reordering
-    createMatrixPermuted(A, triplets);
-
-    {
-        // test multiply
-        CholUp::Matrix<double> rhs(A.ncols, 3);
-        rhs.fill();
-
-        for(int i = 0; i < A.ncols * 3; ++i)
-            rhs.data[i] = 0.01 * (rand() % 100);
-
-        auto x = A * rhs;
-
-
-        x.write("./data/y1");
-        rhs.write("./data/y0");
-
-
-        A.writeMatrixMarket("./data/AA.mtx");
-    }
-
-
+    Eigen::SparseMatrix<double> A;
+    Eigen::loadMarket(A, "../data/LTL.mtx");
+    assert(A.isCompressed());
+    
+    auto roiIds = loadIds("../data/ids");
 
     // factorize & update
     Timer t0("Factor");
@@ -112,13 +90,14 @@ int main(int argc, const char * argv[])
     t0.printTime("full");
     t0.reset();
     
-    auto cholPart0 = chol.dirichletPartialFactor(A, roiIds);
+    auto cholPart0 = chol.dirichletPartialFactor(roiIds);
     t0.printTime("partial");
 
     // solve linear system involving cholPart0
     // setup rhs
-    CholUp::Matrix<double> rhs(A.ncols, 3);
+    CholUp::Matrix<double> rhs(A.cols(), 3);
     rhs.fill();
+   
     rhs(roiIds[0], 0) = rhs(roiIds[0], 1) = rhs(roiIds[0], 2) = 1;
     auto rhs0 = rhs;
 
@@ -126,10 +105,11 @@ int main(int argc, const char * argv[])
     cholPart0.solve(rhs);
 
     // write out solution
-    rhs0.write("./data/b");
-    rhs.write("./data/x");
+    rhs0.write("../data/b");
+    rhs.write("../data/x");
 
     // refactor
+   /*
     Eigen::SparseMatrix<double> eigenM2;
     Eigen::loadMarket(eigenM2, "./data/subLTL.mtx");
     CholUp::SparseMatrix<double> A2(eigenM2);
@@ -137,6 +117,6 @@ int main(int argc, const char * argv[])
     Timer t3("Full refactor");
     CholUp::SupernodalCholesky<CholUp::SparseMatrix<double>> chol2(A2);
     t3.printTime();
-
+*/
     return 0;
 }

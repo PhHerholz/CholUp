@@ -22,8 +22,6 @@ public:
     int nrows = -1;
     int nnz = 0;
     int ncols = 0;
-
-    int* perm = nullptr;
     
     int* col = nullptr;
     int* diag = nullptr;
@@ -60,7 +58,6 @@ SparseMatrix<T> fromEigen(const Eigen::SparseMatrix<T>& A);
 template<class T>
 SparseMatrix<T> fromEigen(const Eigen::SparseMatrix<T>& A)
 {
-
     SparseMatrix<T> ret;
 
     ret.nnz = (int)A.nonZeros();
@@ -77,7 +74,7 @@ SparseMatrix<T> fromEigen(const Eigen::SparseMatrix<T>& A)
 
     ret.setDiagonalIndizes();
 
-    return ret;
+    return std::move(ret);
 }
 
 } /* namespace CholUp */

@@ -68,7 +68,6 @@ SparseMatrix<T>::~SparseMatrix()
         if(vals) delete[] vals;
     }
 
-    if(perm) delete[] perm;
     if(diag) delete[] diag;
 }
 
