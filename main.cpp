@@ -78,11 +78,33 @@ tripletDimensions(std::vector<Eigen::Triplet<double>>& triplets)
 int main(int argc, const char * argv[])
 {
     // load data for update
-    Eigen::SparseMatrix<double> A;
-    Eigen::loadMarket(A, "../data/LTL.mtx");
-    assert(A.isCompressed());
+    std::vector<Eigen::Triplet<double>> triplets;
+    triplets.emplace_back(0,0,1.1);
+    triplets.emplace_back(0,1,-0.5);
+    triplets.emplace_back(0,2,-0.5);
     
-    auto roiIds = loadIds("../data/ids");
+    triplets.emplace_back(1,0,-0.5);
+    triplets.emplace_back(1,1,1.1);
+    triplets.emplace_back(1,3,-0.5);
+    
+    triplets.emplace_back(2,0,-0.5);
+    triplets.emplace_back(2,2,1.1);
+    triplets.emplace_back(2,3,-0.5);
+    
+    triplets.emplace_back(3,1,-0.5);
+    triplets.emplace_back(3,2,-0.5);
+    triplets.emplace_back(3,3,1.1);
+    
+    
+    
+    Eigen::SparseMatrix<double> A(4,4);
+    A.setFromTriplets(triplets.begin(), triplets.end());
+    Eigen::saveMarket(A, "../data/A.mtx");
+    //  Eigen::loadMarket(A, "../data/LTL.mtx");
+    assert(A.isCompressed());
+
+    vector<int> roiIds{3,0};
+    //auto roiIds = loadIds("../data/ids");
 
     // factorize & update
     Timer t0("Factor");
