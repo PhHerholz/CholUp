@@ -36,7 +36,8 @@ public:
     SparseMatrix& operator=(const SparseMatrix& A);
 
     explicit SparseMatrix(Eigen::SparseMatrix<T, Eigen::ColMajor, int>& eigenMatrix);
-
+    SparseMatrix(const int cols, const int rows, const int nnz);
+    
     void setDiagonalIndizes();
 
     ~SparseMatrix();

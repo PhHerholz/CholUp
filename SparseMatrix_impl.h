@@ -59,6 +59,13 @@ SparseMatrix<T>::SparseMatrix(Eigen::SparseMatrix<T, Eigen::ColMajor, int>& eige
 }
 
 template<class T>
+SparseMatrix<T>::SparseMatrix(const int rows, const int cols, const int nnz_)
+: nrows(rows), ncols(cols), nnz(nnz_), col(new int[cols + 1]), row(new int[nnz_]), vals(new T[nnz_])
+{
+
+}
+
+template<class T>
 SparseMatrix<T>::~SparseMatrix()
 {
     if(!dataBorrowed)
@@ -113,6 +120,7 @@ SparseMatrix<T>::operator*(const Matrix<double>& m) const
 template<class T>
 SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix& A)
 {
+    std::cout << "warning: explicit sparse matrix copy." << std::endl;
 
     nnz = A.nnz;
     ncols = A.ncols;
