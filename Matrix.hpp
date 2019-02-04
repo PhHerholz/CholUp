@@ -196,7 +196,7 @@ public:
             for(int j = 0; j < nrows; ++j)
                 file << *ptr++ << " ";
 
-            
+
             file << "\n";
         }
 
