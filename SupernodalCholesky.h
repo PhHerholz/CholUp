@@ -149,8 +149,6 @@ namespace CholUp {
     SupernodalCholesky<MatrixType>::SupernodalCholesky(const Eigen::SparseMatrix<double>& A0)
     : N(A0.cols()), flag(A0.cols(), 0), rowMap(A0.cols(), -1)
     {
-        Timer t;
-
         A = permuteMatrix(A0, perm);
 
         iperm.resize(perm.size());
@@ -158,16 +156,10 @@ namespace CholUp {
         for(int i = 0; i < A.ncols; ++i)
             iperm[perm[i]] = i;
 
-        t.printTime("permute");
-        t.reset();
         symbolic(A);
-        t.printTime("symbolic");
-        t.reset();
         numeric(A);
-        t.printTime("numeric");
-
     }
-    
+
     template<class MatrixType>
     SupernodalCholesky<MatrixType>::~SupernodalCholesky()
     {
@@ -1111,12 +1103,8 @@ namespace CholUp {
             }
         }
 
-        Timer t;
-
         solveL(tmp);
         solveLT(tmp);
-
-        t.printTime("solve inner");
 
         for(int j = 0; j < m.ncols; ++j)
         {
