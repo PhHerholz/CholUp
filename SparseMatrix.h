@@ -22,12 +22,12 @@ public:
     int nrows = -1;
     int nnz = 0;
     int ncols = 0;
-    
+
     int* col = nullptr;
     int* diag = nullptr;
     int* row = nullptr;
     T* vals = nullptr;
-    
+
     SparseMatrix();
     SparseMatrix(const int nrows, const int ncols);
     explicit SparseMatrix(const SparseMatrix& A);
@@ -37,7 +37,7 @@ public:
 
     explicit SparseMatrix(Eigen::SparseMatrix<T, Eigen::ColMajor, int>& eigenMatrix);
     SparseMatrix(const int cols, const int rows, const int nnz);
-    
+
     void setDiagonalIndizes();
 
     ~SparseMatrix();
