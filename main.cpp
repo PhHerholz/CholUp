@@ -35,118 +35,15 @@ loadIds(std::string fname)
     return std::vector<int>(idPtr, idPtr + nids);
 }
 
-vector<Eigen::Triplet<double>>
-loadTriplets(std::string fname)
-{
-    vector<Eigen::Triplet<double>> triplets;
-    
-    ifstream file(fname);
-    int n;
-    file >> n;
-    
-    for(int k = 0; k < n; ++k)
-    {
-        int i, j;
-        double v;
-        
-        file >> i;
-        file >> j;
-        file >> v;
-    
-        triplets.emplace_back(i, j, v);
-    }
-    
-    file.close();
-    
-    return triplets;
-}
-
-int
-tripletDimensions(std::vector<Eigen::Triplet<double>>& triplets)
-{
-    const int N =  1 + std::max(std::max_element(triplets.begin(), triplets.end(),
-                                             [](const Eigen::Triplet<double>& t0, const Eigen::Triplet<double>& t1){return t0.row() < t1.row();})->row(),
-
-                                std::max_element(triplets.begin(), triplets.end(),
-                                             [](const Eigen::Triplet<double>& t0, const Eigen::Triplet<double>& t1){return t0.col() < t1.col();})->col());
-
-    return N;
-}
 
 
-void loadSimpleMatrix(Eigen::SparseMatrix<double>& A)
-{
-    std::vector<Eigen::Triplet<double>> triplets;
-    triplets.emplace_back(0,0,1.1);
-    triplets.emplace_back(0,1,-0.5);
-    triplets.emplace_back(0,2,-0.5);
-
-    triplets.emplace_back(1,0,-0.5);
-    triplets.emplace_back(1,1,1.1);
-    triplets.emplace_back(1,3,-0.5);
-
-    triplets.emplace_back(2,0,-0.5);
-    triplets.emplace_back(2,2,1.1);
-    triplets.emplace_back(2,3,-0.5);
-
-    triplets.emplace_back(3,1,-0.5);
-    triplets.emplace_back(3,2,-0.5);
-    triplets.emplace_back(3,3,1.1);
-
-    A.resize(4,4);
-    A.setFromTriplets(triplets.begin(), triplets.end());
-}
-
-
-void simpleExample()
-{
-    // minimal example
-
-    Eigen::SparseMatrix<double> A;
-    loadSimpleMatrix(A);
-    vector<int> roiIds{1,3,0};
-
-    CholUp::SupernodalCholesky<CholUp::SparseMatrix<double>> chol(A);
-    auto cholPart0 = chol.dirichletPartialFactor(roiIds);
-
-    CholUp::Matrix<double> rhs(4, 1);
-    rhs.fill();
-    rhs(3, 0) = 1.;
-    rhs(0, 0) = 2.;
-
-    auto rhs0 = rhs;
-
-    cholPart0.solve(rhs);
-
-
-    // check result
-    Eigen::MatrixXd AII(3,3);
-    Eigen::VectorXd b(3), x(3);
-
-    for(int i = 0; i < 3; ++i)
-        for(int j = 0; j < 3; ++j)
-            AII(i, j) = A.coeffRef(roiIds[i], roiIds[j]);
-
-    for(int i = 0; i < 3; ++i)
-    {
-        b(i) = rhs0(roiIds[i], 0);
-        x(i) = rhs(roiIds[i], 0);
-
-    }
-
-    std::cout << "error: " << (AII * x - b).norm() << std::endl;
-}
 
 int main(int argc, const char * argv[])
 {
-
-    simpleExample();
-
     Eigen::SparseMatrix<double> A;
     Eigen::loadMarket(A, "../data/LTL.mtx");
     assert(A.isCompressed());
 
-    //vector<int> roiIds{3,0};
     auto roiIds = loadIds("../data/ids");
 
     // factorize & update
