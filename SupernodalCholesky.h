@@ -13,7 +13,18 @@
 #include <thread>
 #include <cstring>
 
+
+//#define USE_EIGEN_FOR_BLAS
+#undef USE_EIGEN_FOR_BLAS
+
+#ifdef USE_EIGEN_FOR_BLAS
+    #include <Eigen/Dense>
+    using EigenMap = Eigen::Map<Eigen::Matrix<double, -1, -1, Eigen::ColMajor>, Eigen::Unaligned, Eigen::Stride<-1, 1>> ;
+#endif
+
+
 namespace CholUp {
+
 
     template<class MatrixType>
     class SupernodalCholesky
@@ -69,12 +80,6 @@ namespace CholUp {
 
         void numeric(const MatrixType& A);
 
-        void solveL(Matrix<T>& m);
-
-        void solveLT(Matrix<T>& m);
-
-        void solve(Matrix<T>& m);
-
         void solve3_RowMajor(T* md);
 
         template<int Cols>
@@ -82,10 +87,6 @@ namespace CholUp {
 
         template<int Cols>
         void solveLT_RowMajor(T*);
-
-        std::string memoryReport();
-
-        void update(SparseMatrix<double>& W);
 
         int getDependantSupernodes(const std::vector<int>& nodes, int* out);
 
@@ -104,8 +105,6 @@ namespace CholUp {
                                 double* ws_ = nullptr,
                                 int wslen_ = 0);
 
-        SparseSupernodalMatrix<T>
-        solveL(const SparseSupernodalMatrix<T>& m);
 
         ~SupernodalCholesky();
 
@@ -124,33 +123,9 @@ namespace CholUp {
 
 
     template<class MatrixType>
-    std::string
-    SupernodalCholesky<MatrixType>::memoryReport()
-    {
-
-        const int matrixStructureData = (3 * L.NS + L.NR + L.numcols) * sizeof(int);
-        const int matrixValueData = L.NNZ * sizeof(T);
-        const int rowStructureData = (L.numcols + 1 + 2 * L.NR) * sizeof(int);
-        const int treeData = (L.NS + L.numcols) * sizeof(int);
-        const int workspaceData = wslen * sizeof(double);
-        const int workspaceTmpData = 2 * L.numcols * sizeof(int);
-
-        return std::string("Memory report: \n") +
-        std::string("factor structure data    : ") + std::to_string(matrixStructureData) + "\n" +
-        "factor value data        : " + std::to_string(matrixValueData) + "\n" +
-        "row structure data       : " + std::to_string(rowStructureData) + "\n" +
-        "tree information         : " + std::to_string(treeData) + "\n" +
-        "total factorization data : " + std::to_string( (matrixStructureData + matrixValueData + rowStructureData + treeData) * 10e-6 ) + " MB \n" +
-        "workspace data           : " + std::to_string(workspaceData) + "\n" +
-        "temporary ws data        : " + std::to_string(workspaceTmpData) + "\n\n";
-    }
-
-    template<class MatrixType>
     SupernodalCholesky<MatrixType>::SupernodalCholesky(const Eigen::SparseMatrix<double>& A0)
     : N(A0.cols()), flag(A0.cols(), 0), rowMap(A0.cols(), -1)
     {
-     //   Timer t;
-
         A = permuteMatrix(A0, perm);
 
         iperm.resize(perm.size());
@@ -158,14 +133,8 @@ namespace CholUp {
         for(int i = 0; i < A.ncols; ++i)
             iperm[perm[i]] = i;
 
-     //   t.printTime("permute");
-      //  t.reset();
         symbolic(A);
-      //  t.printTime("symbolic");
-      //  t.reset();
         numeric(A);
-    //    t.printTime("numeric");
-
     }
     
     template<class MatrixType>
@@ -182,6 +151,8 @@ namespace CholUp {
         if(colsInRow) delete[] colsInRow;
         if(colsInRowColIndex) delete[] colsInRowColIndex;
     }
+
+#ifndef USE_EIGEN_FOR_BLAS
 
     extern "C"
     {
@@ -213,6 +184,7 @@ namespace CholUp {
         char cR = 'R';
     }
 
+#endif
 
     template<class MatrixType>
     SupernodalCholesky<MatrixType>&
@@ -1047,93 +1019,11 @@ namespace CholUp {
 
 
     template<class MatrixType>
-    void SupernodalCholesky<MatrixType>::update(SparseMatrix<double>& W)
+    void SupernodalCholesky<MatrixType>::solve3_RowMajor(T* md)
     {
-        assert(W.ncols == 1);
-        assert(std::all_of(ws, ws + wslen, [](const double d){return d == 0.;}));
-
-        // scatter single column in W into ws
-        for(int i = W.col[0]; i < W.col[1]; ++i)
-        {
-            ws[W.row[i]] = W.vals[i];
-        }
-
-        double alpha, beta = 1, delta, gamma, w1, beta2 = 1 ;
-        int j = L.colMap[W.row[0]];
-
-        // update all supernodes along the path starting at 'j'
-        for( ; j != -1; j = setree[j])
-        {
-            // update all columns in supernode
-            int ss = L.supernodeSizes[j];
-            int vp = L.snodeValueStart[j];
-            int row0 = L.rows[L.cols[j]];
-
-            for(int k = 0; k < ss; ++k)
-            {
-                vp += k; // supernodes store dense triangular blocks, skip first k entries
-
-                alpha = ws[row0 + k] / L.vals[vp];
-                beta2 = beta * beta + alpha * alpha;
-
-                beta2 = sqrt(beta2);
-                delta = beta / beta2;
-                gamma = alpha / (beta2 * beta);
-
-                L.vals[vp] = delta * L.vals[vp] + gamma * ws[row0 + k];
-                beta = beta2;
-
-                ws[row0 + k] = .0;
-
-                ++vp;
-                for(int i = L.cols[j] + k + 1; i < L.cols[j+1]; ++i, ++vp)
-                {
-                    w1 = ws[L.rows[i]];
-                    ws[L.rows[i]] = w1 - alpha * L.vals[vp];
-                    L.vals[vp] = delta * L.vals[vp] + gamma * w1;
-                }
-            }
-        }
+        solveL_RowMajor<3>(md);
+        solveLT_RowMajor<3>(md);
     }
-
-
-    template<class MatrixType>
-    void SupernodalCholesky<MatrixType>::solve(Matrix<T>& m)
-    {
-        if(iperm.empty())
-        {
-            assert(N = m.nrows);
-            solveL(m);
-            solveLT(m);
-            return;
-        }
-
-        Matrix<T> tmp(N, m.ncols);
-
-        for(int j = 0; j < m.ncols; ++j)
-        {
-            for(int i = 0; i < N; ++i)
-            {
-                tmp(i, j) = m(iperm[i], j) ;
-            }
-        }
-
-        Timer t;
-
-        solveL(tmp);
-        solveLT(tmp);
-
-        t.printTime("solve inner");
-
-        for(int j = 0; j < m.ncols; ++j)
-        {
-            for(int i = 0; i < N; ++i)
-            {
-                m(iperm[i], j) = tmp(i, j);
-            }
-        }
-    }
-
 
     template<class MatrixType>
     template<int Cols>
@@ -1174,13 +1064,6 @@ namespace CholUp {
     }
 
     template<class MatrixType>
-    void SupernodalCholesky<MatrixType>::solve3_RowMajor(T* md)
-    {
-        solveL_RowMajor<3>(md);
-        solveLT_RowMajor<3>(md);
-    }
-
-    template<class MatrixType>
     template<int Cols>
     void SupernodalCholesky<MatrixType>::solveLT_RowMajor(T* md)
     {
@@ -1218,89 +1101,10 @@ namespace CholUp {
         }
     }
 
-    template<class MatrixType>
-    void SupernodalCholesky<MatrixType>::solveL(Matrix<T>& m)
-    {
-
-        const int NS = L.NS;//L.supernodeSizes.size();
-        double* md = m.data; //m.dataVector().data();
-        int NC = m.cols();
-        int NR = m.rows();
-        int k0 = 0;
-
-        assert(ws && std::all_of(ws, ws + wslen, [](const double d){return d == .0;}));
-
-        for(int i = 0; i < NS; ++i)
-        {
-            int ss = L.supernodeSizes[i];
-            int k1 = k0 + ss;
-            int rowsi = L.cols[i+1] - L.cols[i];
-            int rows2 = rowsi - ss;
-            int vstart = L.snodeValueStart[i];
-
-            dtrsm_(&cL, &cL, &cN, &cN, &ss, &NC, &one, &L.vals[vstart], &rowsi, &md[k0], &NR);
-
-            if(rows2 > 0)
-            {
-                dgemm_(&cN, &cN, &rows2, &NC, &ss, &one, &L.vals[vstart + ss], &rowsi, &md[k0], &NR, &zero, ws, &rows2);
-
-                int id = L.cols[i] + ss;
-
-                for(int j = 0; j < rows2; ++j, ++id)
-                {
-                    for(int k = 0; k < NC; ++k)
-                    {
-                        md[L.rows[id] + k * NR] -= ws[j + k * rows2];
-                    }
-                }
-            }
-
-            k0 = k1;
-        }
-    }
-
-    template<class MatrixType>
-    void SupernodalCholesky<MatrixType>::solveLT(Matrix<T>& m)
-    {
-        const int NS = L.NS;//L.supernodeSizes.size();
-        double* md = m.data; //m.dataVector().data();
-        int NC = m.cols();
-        int NR = m.rows();
-        int k1 = L.numcols;
-
-        for(int i = NS - 1; i >= 0; --i)
-        {
-            int ss = L.supernodeSizes[i];
-            int k0 = k1 - ss;
-            int rowsi = L.cols[i+1] - L.cols[i];
-            int rows2 = rowsi - ss;
-            int vstart = L.snodeValueStart[i];
-
-            if(rows2 > 0)
-            {
-                int id = 0;
-                for(int j = L.cols[i] + ss; j < L.cols[i+1]; ++j, ++id)
-                {
-                    for(int k = 0; k < NC; ++k)
-                    {
-                        ws[id + k * rows2] = md[L.rows[j] + k * NR];
-                    }
-                }
-
-                dgemm_(&cT, &cN, &ss, &NC, &rows2, &minus_one , &L.vals[vstart + ss], &rowsi, ws, &rows2, &one, &md[k0], &NR);
-            }
-
-            dtrsm_(&cL, &cL, &cT, &cN, &ss, &NC, &one, &L.vals[vstart], &rowsi, &md[k0], &NR);
-
-
-            k1 = k0;
-        }
-    }
 
     template<class MatrixType>
     void SupernodalCholesky<MatrixType>::numeric(const MatrixType& A)
     {
-
         const int NS = L.NS;
         int k0 = 0;
 
@@ -1336,7 +1140,7 @@ namespace CholUp {
                 }
             }
 
-            // compute L(k0:k1, 1:k1-1) * L(k0:k1, 1:k1-1)' and substract from A (already copied into L)
+            // compute L(k1:n, 1:k1-1) * L(k0:k1, 1:k1-1)' and substract from A (already copied into L)
             for(int k = k0; k < k1; ++k)
             {
                 for(int j = startColsInRow[k]; j < startColsInRow[k+1]; ++j)
@@ -1361,13 +1165,35 @@ namespace CholUp {
                         int stride = L.cols[c+1] - L.cols[c];
 
 
+
+#ifdef USE_EIGEN_FOR_BLAS
+                        auto mapped = EigenMap(vstart, ndrows, ssc, Eigen::Stride<-1,1>(stride, 1));
+
+
+                        EigenMap(ws, ndrows, ndrows, Eigen::Stride<-1,1>(nrows, 1))
+                            = (mapped * mapped.transpose()).triangularView<Eigen::Lower>();
+
+#else
                         dsyrk_(&cL, &cN,
                                &ndrows, &ssc,
                                &one,
                                vstart, &stride,
                                &zero,
                                ws, &nrows);
+#endif
 
+
+#ifdef USE_EIGEN_FOR_BLAS
+
+
+                        EigenMap(ws + ndrows, m1, ndrows, Eigen::Stride<-1,1>(nrows, 1)).noalias()
+                        =
+                        EigenMap(vstart + ndrows, m1, ssc, Eigen::Stride<-1, 1>(stride, 1))
+                        *
+                        EigenMap(vstart, ndrows, ssc, Eigen::Stride<-1,1>(stride, 1)).transpose()
+                        ;
+
+#else
                         dgemm_(&cN, &cT,
                                &m1, &ndrows, &ssc,
                                &one,
@@ -1375,7 +1201,7 @@ namespace CholUp {
                                vstart, &stride,
                                &zero,
                                ws + ndrows, &nrows);
-
+#endif
                         int k2 = 0;
                         double* vptr = ws;
                         double* baseDest = &L.vals[L.snodeValueStart[i]];
@@ -1401,7 +1227,13 @@ namespace CholUp {
 
 
             // dense cholesky factorization of diagonal block
+#ifdef USE_EIGEN_FOR_BLAS
+            auto mapped2 = EigenMap(&L.vals[L.snodeValueStart[i]], ss, ss, Eigen::Stride<-1,1>(nrows, 1));
+            Eigen::LLT<Eigen::Ref<EigenMap>> tmp(mapped2);
+
+#else
             dpotrf_(&cL, &ss, &L.vals[L.snodeValueStart[i]], &nrows, &info);
+#endif
 
             if(info)
             {
@@ -1411,10 +1243,17 @@ namespace CholUp {
             int tailRows = nrows - ss;
 
             // solve triangular system to compute tail of supernode 'i'
+#ifdef USE_EIGEN_FOR_BLAS
+
+            EigenMap(&L.vals[L.snodeValueStart[i]], ss, ss, Eigen::Stride<-1,1>(nrows, 1)).triangularView<Eigen::Lower>().solveInPlace(
+                  EigenMap(&L.vals[L.snodeValueStart[i] + ss], tailRows, ss, Eigen::Stride<-1,1>(nrows, 1)).transpose()
+            );
+#else
             dtrsm_(&cR, &cL, &cT, &cN,
                    &tailRows, &ss, &one,
                    &L.vals[L.snodeValueStart[i]], &nrows,
                    &L.vals[L.snodeValueStart[i] + ss], &nrows);
+#endif
 
             k0 = k1;
         }
@@ -1424,7 +1263,6 @@ namespace CholUp {
     template<class MatrixType>
     void SupernodalCholesky<MatrixType>::symbolic(const MatrixType& A)
     {
-
         // compute etree of for A
         int* colCount = new int[N];
         etree = new int[N];
