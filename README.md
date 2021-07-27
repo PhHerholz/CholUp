@@ -7,4 +7,4 @@ presented at SIGGRAPH Asia 2018.
 The code is depends only on [Eigen](https://gitlab.com/libeigen/eigen). Best performance will be achieved when linking to a fast parallel BLAS implementation like Intel MKL. The code can also use Eigen to mimic BLAS. Compile with the option `-DUSE_EIGEN_FOR_BLAS` to select this option.
 
 ## Acknowledgements
-Large parts of the code a heavily inspired by [Cholmod](https://github.com/DrTimothyAldenDavis/SuiteSparse) authored by Tim Davis and William Hager.
+The code is written from scratch, however, large parts are heavily inspired by [Cholmod](https://github.com/DrTimothyAldenDavis/SuiteSparse) authored by Tim Davis and William Hager.
