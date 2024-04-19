@@ -47,7 +47,7 @@ int main(int argc, const char * argv[])
     auto roiIds = loadIds("../data/ids");
 
     // factorize & update
-    Timer t0("Factor");
+    CholUp::Timer t0("Factor");
     CholUp::SupernodalCholesky<CholUp::SparseMatrix<double>> chol(A);
     t0.printTime("full");
     t0.reset();
@@ -57,28 +57,17 @@ int main(int argc, const char * argv[])
 
     // solve linear system involving cholPart0
     // setup rhs
-    CholUp::Matrix<double> rhs(A.cols(), 3);
+    CholUp::Matrix<double> rhs(A.cols(), 1);
     rhs.fill();
    
-    rhs(roiIds[0], 0) = rhs(roiIds[0], 1) = rhs(roiIds[0], 2) = 1;
+    rhs(roiIds[0], 0) = 1;
     auto rhs0 = rhs;
 
     // solve. Permutation is automatically taken care of. Rhs defines values for boundary conditions, values in rhs[roiIds] are replaced by the solve.
-    cholPart0.solve(rhs);
+    cholPart0.solveL_RowMajor<1>(rhs.data);
+    cholPart0.solveLT_RowMajor<1>(rhs.data);
+    
 
-    // write out solution
-    rhs0.write("../data/b");
-    rhs.write("../data/x");
 
-    // refactor
-   /*
-    Eigen::SparseMatrix<double> eigenM2;
-    Eigen::loadMarket(eigenM2, "./data/subLTL.mtx");
-    CholUp::SparseMatrix<double> A2(eigenM2);
-
-    Timer t3("Full refactor");
-    CholUp::SupernodalCholesky<CholUp::SparseMatrix<double>> chol2(A2);
-    t3.printTime();
-*/
     return 0;
 }
